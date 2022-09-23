@@ -24,7 +24,7 @@ struct piece {
 		col = 0;
 		row = 0;
 		grid[0][0].kind = -1;
-		grid[6][6].kind = -1;
+		//grid[cellSize + 1][cellSize + 1].kind = -1;
 	}
 	
 	void swapPiece(piece other) {
@@ -34,14 +34,14 @@ struct piece {
 		grid[other.row][other.col] = other;
 	}
 	
-} grid[6][6];
+} grid[8][8];
 
 
 // Распределение цветов (типов лапок) и запись координат
 void completion() {
 	for (int i = 1; i <= sizeLevel; i++) {
 		for (int j = 1; j <= sizeLevel; j++) {
-			grid[i][j].kind = rand() % (sizeLevel - 1);
+			grid[i][j].kind = rand() % 5;
 			grid[i][j].col = j;
 			grid[i][j].row = i;
 			grid[i][j].x = offset.x + (j - 1) * cellSize;
@@ -204,12 +204,15 @@ int main()
 						(Mouse::getPosition(window).y <= 540) && !win) {
 							completion();
 					}
+					win = true;
 					if ((Mouse::getPosition(window).x >= 325) && // для кнопки next
 						(Mouse::getPosition(window).x <= 575) &&
 						(Mouse::getPosition(window).y >= 420) &&
-						(Mouse::getPosition(window).y <= 520) && level == 0) {
+						(Mouse::getPosition(window).y <= 520) && win) {
 						start_click++;
+						//win = false;
 					}
+					win = false;
 				}
 			}
 		}
@@ -308,7 +311,7 @@ int main()
 				for (int i = sizeLevel, n = 0; i > 0; i--) {
 					if (grid[i][j].match) {
 						points += 10;
-						grid[i][j].kind = rand() % (sizeLevel - 1);
+						grid[i][j].kind = rand() % 5;
 						grid[i][j].y = -cellSize * n++;
 						grid[i][j].match = 0;
 						//grid[i][j].alpha = 255;
@@ -316,16 +319,35 @@ int main()
 				}
 			} 
 		}
-		if (points > 1000) {
+		if (points > 300) {
+			win = true;
+			start_click = 0;
+			cellSize = 89;
+			sizeLevel = 6;
+			points = 0;
+			level = 2;
+
+		}
+		if (points > 400) {
+			win = true;
+			start_click = 0;
+			cellSize = 77;
+			sizeLevel = 7;
+			points = 0;
+			level = 3;
+		}
+		if (points > 500) {
 			win = true;
 			start_click = 0;
 		}
 
+		// очищаем все
 		window.clear();
+
 		// Рисуем фон
 		window.draw(sprBackgroundLevel1);
 
-		
+		// Первоначальное окно с инфой (вступление) 
 		if (start_click == 0 && level == 0) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
@@ -336,6 +358,7 @@ int main()
 			
 		}
 
+		// кнопочка  дальше
 		if ((start_click == 0 && level == 0) ||
 			(start_click == 1) || (win)) {
 			sprLabel.setScale(Vector2f(1, 1));
@@ -346,39 +369,47 @@ int main()
 			window.draw(textLevel);
 		}
 
+		// вывод сюжетной истории в зависимости от уровня
 		if (start_click == 1) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
 			window.draw(sprLabel);
 			if (level == 0) {
-				// история 1
+				textLabels.setString("history 1");
+				textLabels.setPosition(220, 120);
 			}
 			if (level == 1) {
-				// история 2
+				textLabels.setString("history 1");
+				textLabels.setPosition(220, 120);
 			}
 			if (level == 2) {
-				// история 3
+				textLabels.setString("history 1");
+				textLabels.setPosition(220, 120);
 			}
+			window.draw(textLabels);
 		}
 
+		// окно, которое даст нам знать, что мы выиграли
 		if (win) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
 			window.draw(sprLabel);
-			textLevel.setString("какой-то текст");
-			textLevel.setPosition(390, 435);
+			textLevel.setString("text win");
+			textLevel.setPosition(220, 120);
 			window.draw(textLevel);
 		}
 
-		if (start_click == 2) {
-			level++;
+		// переключение уровня
+		if (start_click == 2 && level == 0) {
+			level = 1;
 		}
 
 		if (level > 0 && !win) {
 			// Рисуем сетку
 			for (int i = 0; i < sizeLevel; i++) {
 				for (int j = 0; j < sizeLevel; j++) {
-					switch (sizeLevel) {
+					sprSquareLevel1.setPosition(35 + cellSize * i, 35 + cellSize * j);
+					/*switch (sizeLevel) {
 					case 5: 
 						sprSquareLevel1.setPosition(35 + 105 * i, 35 + 105 * j);
 					case 6:
@@ -387,7 +418,7 @@ int main()
 						sprSquareLevel1.setPosition(35 + 77 * i, 35 + 77 * j);//72
 					default:
 						break;
-					}
+					}*/
 					window.draw(sprSquareLevel1);
 				}
 			}
