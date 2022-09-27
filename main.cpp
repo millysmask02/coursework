@@ -39,9 +39,9 @@ struct piece {
 
 // Распределение цветов (типов лапок) и запись координат
 void completion() {
-	for (int i = 1; i <= sizeLevel; i++) {
-		for (int j = 1; j <= sizeLevel; j++) {
-			grid[i][j].kind = rand() % 5;
+	for (int i = 1; i <= 7; i++) {
+		for (int j = 1; j <= 7; j++) {
+			grid[i][j].kind = rand() % (sizeLevel - 1);
 			grid[i][j].col = j;
 			grid[i][j].row = i;
 			grid[i][j].x = offset.x + (j - 1) * cellSize;
@@ -115,7 +115,7 @@ int main()
 	Image imSquareLevel1;
 	imSquareLevel1.loadFromFile("images/square.png");
 	imSquareLevel1.createMaskFromColor(Color(255, 255, 255));
-	imSquareLevel1.createMaskFromColor(Color(200, 191, 231), 150);
+	imSquareLevel1.createMaskFromColor(Color(200, 191, 231), 200);
 
 	Texture textSquareLevel1;
 	textSquareLevel1.loadFromImage(imSquareLevel1);
@@ -137,7 +137,7 @@ int main()
 	Image imLabel;
 	imLabel.loadFromFile("images/label.png");
 	imLabel.createMaskFromColor(Color(255, 255, 255));
-	imLabel.createMaskFromColor(Color(200, 191, 231), 150);
+	imLabel.createMaskFromColor(Color(200, 191, 231), 200);
 
 	Texture textLabel;
 	textLabel.loadFromImage(imLabel);
@@ -152,6 +152,7 @@ int main()
 	// Текст уровня, баллов, кпопки
 	Text textLevel("", font, 50);
 	textLevel.setStyle(sf::Text::Bold);
+	
 
 	// Текст набранных баллов
 	Text textLabels("", font, 30);
@@ -178,12 +179,14 @@ int main()
 	int x0, y0, x, y; // столцеб и строка фишек, которые меняем местами
 	int click = 0; // состояние клика
 	Vector2i pos; // координаты, куда мы тыкнули. Начало отсчета от начала клеток
-	bool isSwap = false; // флаг, что мы что-то поменяла
-	bool isMoving = false;
-	int points = 0; // кол-во удаленных фишек
-	bool win = false; // флаг, чтобы не давать ничего делать после победы
-	int start_click = 0;
-	int level = 0;
+	bool isSwap = false; // флаг, что мы что-то поменяли
+	bool isMoving = false;  // помеченные
+	int points = 0; // кол-во баллов
+	bool win = true; // флаг победы
+	int start_click = 0; // кол-во кликов в переходе между лвл
+	int level = 1; 
+	int goal = 1000; // сколько очков надо набрать
+	bool startGame = false; // флаг, что мы начали игру
 
 
 	while (window.isOpen()) {
@@ -196,15 +199,16 @@ int main()
 				if (event.key.code == Mouse::Left) { 
 					if (!isSwap && !isMoving && !win) {
 						click++;
+						startGame = true;
 					}
 					pos = Mouse::getPosition(window) - offset;
 					if ((Mouse::getPosition(window).x >= 600) && // для кнопки mix
 						(Mouse::getPosition(window).x <= 850) &&
 						(Mouse::getPosition(window).y >= 455) &&
-						(Mouse::getPosition(window).y <= 540) && !win) {
+						(Mouse::getPosition(window).y <= 540)) {
+							startGame = false;
 							completion();
 					}
-					win = true;
 					if ((Mouse::getPosition(window).x >= 325) && // для кнопки next
 						(Mouse::getPosition(window).x <= 575) &&
 						(Mouse::getPosition(window).y >= 420) &&
@@ -212,7 +216,6 @@ int main()
 						start_click++;
 						//win = false;
 					}
-					win = false;
 				}
 			}
 		}
@@ -258,41 +261,13 @@ int main()
 			}
 		}
 
-		
-		/* Здесь надо разобраться, оно не работает 
-		//Deleting amimation
-		if (!isMoving) {
-			for (int i = 1; i <= 5; i++) {
-				for (int j = 1; j <= 5; j++) {
-					if (grid[i][j].match) {
-						if (grid[i][j].alpha > 10) {
-							grid[i][j].alpha -= 10;
-							isMoving = true;
-						}
-					}
-				}
-			}
-		} 
-
-		
-		//Get score
-		int score = 0;
-		for (int i = 1; i <= 5; i++) {
-			for (int j = 1; j <= 5; j++) {
-				score += grid[i][j].match;
-			}
-		}
-		*/ 
-
-		//Second swap if no match
+		// Повторая замена, если нет совпадений
 		if (isSwap && !isMoving) {
-			//if (!score) {
 				grid[y0][x0].swapPiece(grid[y][x]);
 				isSwap = 0;
-			//}
 		}
 		
-		//Update grid
+		// Обновление 
 		if (!isMoving) {
 			for (int i = sizeLevel; i > 0; i--) {
 				for (int j = 1; j <= sizeLevel; j++) {
@@ -310,57 +285,90 @@ int main()
 			for (int j = 1; j <= sizeLevel; j++) {
 				for (int i = sizeLevel, n = 0; i > 0; i--) {
 					if (grid[i][j].match) {
-						points += 10;
+						if (startGame) {
+							points += 10;
+						}
 						grid[i][j].kind = rand() % 5;
 						grid[i][j].y = -cellSize * n++;
 						grid[i][j].match = 0;
-						//grid[i][j].alpha = 255;
 					}
 				}
 			} 
 		}
-		if (points > 300) {
+
+		// переключение уровней
+		if (points >= goal && level == 1) {
 			win = true;
-			start_click = 0;
 			cellSize = 89;
 			sizeLevel = 6;
-			points = 0;
 			level = 2;
-
-		}
-		if (points > 400) {
-			win = true;
+			goal = 2000;
 			start_click = 0;
+			points = 0;
+			startGame = false;
+		}
+
+		if (points >= goal && level == 2) {
+			win = true;
 			cellSize = 77;
 			sizeLevel = 7;
-			points = 0;
 			level = 3;
-		}
-		if (points > 500) {
-			win = true;
+			goal = 3000;
 			start_click = 0;
+			points = 0;
+			startGame = false;
+		}
+
+		if (points >= goal && level == 3) {
+			win = true;
+			level = 4;
+			start_click = 0;
+			startGame = false;
 		}
 
 		// очищаем все
 		window.clear();
 
 		// Рисуем фон
-		window.draw(sprBackgroundLevel1);
+		if (level == 1) {
+			window.draw(sprBackgroundLevel1);
+		}
+		else if (level == 2) {
+			if (start_click < 2) {
+				window.draw(sprBackgroundLevel1);
+			}
+			else {
+				window.draw(sprBackgroundLevel2);
+			}
+		}
+		else if (level == 3) {
+			if (start_click < 2) {
+				window.draw(sprBackgroundLevel2);
+			}
+			else {
+				window.draw(sprBackgroundLevel3);
+			}
+		}
+		else {
+			window.draw(sprBackgroundLevel3);
+		}
 
 		// Первоначальное окно с инфой (вступление) 
-		if (start_click == 0 && level == 0) {
+		if (start_click == 0 && level == 1) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
 			window.draw(sprLabel);
-			textLevel.setString(" Find out the story\nof two cats by\ncompleting the task \nof levels");
-			textLevel.setPosition(210, 105);
+			textLevel.setString(" Find out the story\n" 
+								"   of two cats by\n" 
+								"completing the task \n" 
+								"        of levels");
+			textLevel.setPosition(210, 107);
 			window.draw(textLevel);
-			
 		}
-
-		// кнопочка  дальше
-		if ((start_click == 0 && level == 0) ||
-			(start_click == 1) || (win)) {
+		
+		// кнопочка  дальше (первое переключение, победа + история)
+		if ((start_click == 0 && level == 1) ||
+			(start_click <= 2 && level > 1 && win)){
 			sprLabel.setScale(Vector2f(1, 1));
 			sprLabel.setPosition(325, 420);
 			window.draw(sprLabel);
@@ -369,56 +377,69 @@ int main()
 			window.draw(textLevel);
 		}
 
+		std::string historyFirst = " When Martha was first brought to the country,\n"
+									"she had no friends. So she sat alone and sad.\n"
+									"The neighborhood cats saw this and offered\n"
+									"Ginger to make friends with her. Then he\n"
+									"decided to fish out of the bucket and treat\n" 
+									"the new guest of the village.";
+
+		std::string historySecond = " Ginger and Marta spent the whole summer\n"
+									"together. But autumn came and the owners took\n"
+									"the cats home. But even so, they continued to\n"
+									"chat in the evenings in vois, discussing the\n"
+									"past summer and plans for the next summer.";
+
+		std::string historyTrird = "   Finally, the long-awaited summer came, and\n"
+									" Martha and Ginger were brought back to the\n"
+									" village. Every morning they went for a walk,\n"
+									" ate together at lunch, and in the evening they\n"
+									" arranged dances. So every summer flew by.";
+
 		// вывод сюжетной истории в зависимости от уровня
-		if (start_click == 1) {
-			sprLabel.setScale(Vector2f(2, 3));
-			sprLabel.setPosition(200, 100);
+		if (start_click == 1 && win) {
+			sprLabel.setScale(Vector2f(3, 3));
+			sprLabel.setPosition(75, 100);
 			window.draw(sprLabel);
-			if (level == 0) {
-				textLabels.setString("history 1");
-				textLabels.setPosition(220, 120);
-			}
-			if (level == 1) {
-				textLabels.setString("history 1");
-				textLabels.setPosition(220, 120);
-			}
 			if (level == 2) {
-				textLabels.setString("history 1");
-				textLabels.setPosition(220, 120);
+				textLabels.setString(historyFirst);
+				textLabels.setPosition(85, 120);
+			}
+			if (level == 3) {
+				textLabels.setString(historySecond);
+				textLabels.setPosition(85, 120);
+			}
+			if (level == 4) {
+				textLabels.setString(historyTrird);
+				textLabels.setPosition(85, 120);
 			}
 			window.draw(textLabels);
 		}
 
 		// окно, которое даст нам знать, что мы выиграли
-		if (win) {
+		if (win && level != 1 && start_click == 0) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
 			window.draw(sprLabel);
-			textLevel.setString("text win");
-			textLevel.setPosition(220, 120);
+			textLevel.setString("    Points scored!\n"
+								"The following story\n" 
+								" is available to you!");
+			textLevel.setPosition(215, 140);
 			window.draw(textLevel);
 		}
 
-		// переключение уровня
-		if (start_click == 2 && level == 0) {
-			level = 1;
+		// переключение победы
+		if ((start_click == 1 && level == 1) || (start_click == 2)) {
+			win = false;
 		}
 
-		if (level > 0 && !win) {
+
+		if ((level > 0) && (level < 4) && (!win)) {
 			// Рисуем сетку
 			for (int i = 0; i < sizeLevel; i++) {
 				for (int j = 0; j < sizeLevel; j++) {
+					sprSquareLevel1.setScale(Vector2f(float(cellSize - 5) / 100, float(cellSize - 5) / 100));
 					sprSquareLevel1.setPosition(35 + cellSize * i, 35 + cellSize * j);
-					/*switch (sizeLevel) {
-					case 5: 
-						sprSquareLevel1.setPosition(35 + 105 * i, 35 + 105 * j);
-					case 6:
-						sprSquareLevel1.setPosition(35 + 89 * i, 35 + 89 * j);//84
-					case 7:
-						sprSquareLevel1.setPosition(35 + 77 * i, 35 + 77 * j);//72
-					default:
-						break;
-					}*/
 					window.draw(sprSquareLevel1);
 				}
 			}
@@ -428,52 +449,58 @@ int main()
 				for (int j = 1; j <= sizeLevel; j++) {
 					piece p = grid[i][j];
 					sprLapa = colorLapa[p.kind];
-					//sprLapa.setColor(colorLapa[p.kind]);
-					//sprLapa.setColor(sprLapa.getColor() + Color(0, 0, 0, p.alpha));
+					sprLapa.setScale(Vector2f(float(cellSize) / 100, float(cellSize) / 100));
 					sprLapa.setPosition(p.x, p.y);
 					sprLapa.move(offset.x - cellSize, offset.y - cellSize);
 					window.draw(sprLapa);
 				}
 			}
 
-
 			// Ячейки для инфы
 			sprLabel.setScale(Vector2f(1, 0.75));
 
-			sprLabel.setPosition(600, 55);
+			// ячейка уровня
+			sprLabel.setPosition(600, 55); 
 			window.draw(sprLabel);
-			textLevel.setString("Level 1");
+			textLevel.setString("Level " + std::to_string(level));
 			textLevel.setPosition(645, 63);
 			window.draw(textLevel);
 
+			// ячейка цели уровня
 			sprLabel.setPosition(600, 140);
 			window.draw(sprLabel);
-			textLabels.setString("Purpose: 3000");
+			textLabels.setString("Purpose: " + std::to_string(goal)); 
 			textLabels.setPosition(620, 160);
 			window.draw(textLabels);
 
+			// ячейка баллов
 			sprLabel.setPosition(600, 250);
 			window.draw(sprLabel);
 			textLabels.setString("Points Scored:");
 			textLabels.setPosition(622, 270);
 			window.draw(textLabels);
 
+			// Набранные баллы
 			sprLabel.setPosition(600, 335);
 			window.draw(sprLabel);
 			textLevel.setString(std::to_string(points));
-			if (points < 100) {
-				textLevel.setPosition(690, 345);
+			if (points == 0) {
+				textLevel.setPosition(710, 345);
+			}
+			else if (points < 100) {
+				textLevel.setPosition(700, 345);
 			}
 			else if (points < 1000) {
-				textLevel.setPosition(680, 345);
+				textLevel.setPosition(685, 345);
 			}
 			else {
-				textLevel.setPosition(670, 345);
+				textLevel.setPosition(680, 345);
 			}
 			window.draw(textLevel);
 
 			sprLabel.setScale(Vector2f(1, 0.85));
 
+			// кнопочка микс
 			sprLabel.setPosition(600, 455);
 			window.draw(sprLabel);
 			textLevel.setString("MIX");
