@@ -12,10 +12,10 @@ Vector2i offset(35, 35);
 int sizeLevel = 5;
 
 struct piece {
-	int x, y; // координаты точки
-	int col, row; // номер столбца и строки
-	int kind; // тип фишки
-	int match; // помечена ли фишка на удаление
+	int x, y; // РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё
+	int col, row; // РЅРѕРјРµСЂ СЃС‚РѕР»Р±С†Р° Рё СЃС‚СЂРѕРєРё
+	int kind; // С‚РёРї С„РёС€РєРё
+	int match; // РїРѕРјРµС‡РµРЅР° Р»Рё С„РёС€РєР° РЅР° СѓРґР°Р»РµРЅРёРµ
 	int alpha;
 
 	piece() {
@@ -37,7 +37,7 @@ struct piece {
 } grid[8][8];
 
 
-// Распределение цветов (типов лапок) и запись координат
+// Р Р°СЃРїСЂРµРґРµР»РµРЅРёРµ С†РІРµС‚РѕРІ (С‚РёРїРѕРІ Р»Р°РїРѕРє) Рё Р·Р°РїРёСЃСЊ РєРѕРѕСЂРґРёРЅР°С‚
 void completion() {
 	for (int i = 1; i <= 7; i++) {
 		for (int j = 1; j <= 7; j++) {
@@ -51,8 +51,8 @@ void completion() {
 }
 
 
-//Match finding поиск совпадений 
-//*т.е находим все нужные 3-ки и помечаем каждую как помеченную*/
+//Match finding РїРѕРёСЃРє СЃРѕРІРїР°РґРµРЅРёР№ 
+//*С‚.Рµ РЅР°С…РѕРґРёРј РІСЃРµ РЅСѓР¶РЅС‹Рµ 3-РєРё Рё РїРѕРјРµС‡Р°РµРј РєР°Р¶РґСѓСЋ РєР°Рє РїРѕРјРµС‡РµРЅРЅСѓСЋ*/
 void matchFinding() {
 	for (int i = 1; i <= sizeLevel; i++) {
 		for (int j = 1; j <= sizeLevel; j++) {
@@ -81,7 +81,7 @@ int main()
 	RenderWindow window(VideoMode(900, 600), "3 in a row with kittens");
 	window.setFramerateLimit(60);
 
-	// Фон уровень 1
+	// Р¤РѕРЅ СѓСЂРѕРІРµРЅСЊ 1
 	Image imBackgroundLevel1;
 	imBackgroundLevel1.loadFromFile("images/lvl1.jpg");
 
@@ -91,7 +91,7 @@ int main()
 	Sprite sprBackgroundLevel1;
 	sprBackgroundLevel1.setTexture(textBackgroundLevel1);
 
-	// Фон уровень 2
+	// Р¤РѕРЅ СѓСЂРѕРІРµРЅСЊ 2
 	Image imBackgroundLevel2;
 	imBackgroundLevel2.loadFromFile("images/lvl2.jpg");
 
@@ -101,7 +101,7 @@ int main()
 	Sprite sprBackgroundLevel2;
 	sprBackgroundLevel2.setTexture(textBackgroundLevel2);
 
-	// Фон уровень 3
+	// Р¤РѕРЅ СѓСЂРѕРІРµРЅСЊ 3
 	Image imBackgroundLevel3;
 	imBackgroundLevel3.loadFromFile("images/lvl3.jpg");
 
@@ -111,7 +111,7 @@ int main()
 	Sprite sprBackgroundLevel3;
 	sprBackgroundLevel3.setTexture(textBackgroundLevel3);
 
-	// Сетка
+	// РЎРµС‚РєР°
 	Image imSquareLevel1;
 	imSquareLevel1.loadFromFile("images/square.png");
 	imSquareLevel1.createMaskFromColor(Color(255, 255, 255));
@@ -123,7 +123,7 @@ int main()
 	Sprite sprSquareLevel1;
 	sprSquareLevel1.setTexture(textSquareLevel1);
 
-	// Лапки
+	// Р›Р°РїРєРё
 	Image imLapa;
 	imLapa.loadFromFile("images/lapa.png");
 
@@ -133,7 +133,7 @@ int main()
 	Sprite sprLapa;
 	sprLapa.setTexture(textLapa);
 
-	// Ячейки для данных уровня и цели
+	// РЇС‡РµР№РєРё РґР»СЏ РґР°РЅРЅС‹С… СѓСЂРѕРІРЅСЏ Рё С†РµР»Рё
 	Image imLabel;
 	imLabel.loadFromFile("images/label.png");
 	imLabel.createMaskFromColor(Color(255, 255, 255));
@@ -145,48 +145,48 @@ int main()
 	Sprite sprLabel;
 	sprLabel.setTexture(textLabel);
 
-	// Шрифт
+	// РЁСЂРёС„С‚
 	Font font;
 	font.loadFromFile("Comic_Sans_MS.ttf");
 
-	// Текст уровня, баллов, кпопки
+	// РўРµРєСЃС‚ СѓСЂРѕРІРЅСЏ, Р±Р°Р»Р»РѕРІ, РєРїРѕРїРєРё
 	Text textLevel("", font, 50);
 	textLevel.setStyle(sf::Text::Bold);
 	
 
-	// Текст набранных баллов
+	// РўРµРєСЃС‚ РЅР°Р±СЂР°РЅРЅС‹С… Р±Р°Р»Р»РѕРІ
 	Text textLabels("", font, 30);
 	textLabels.setStyle(sf::Text::Bold);
 	
 
-	// Массив цветов лапок
+	// РњР°СЃСЃРёРІ С†РІРµС‚РѕРІ Р»Р°РїРѕРє
 	std::vector<Sprite> colorLapa;
-	sprLapa.setColor(Color(208, 9, 199)); // фиолетовый
+	sprLapa.setColor(Color(208, 9, 199)); // С„РёРѕР»РµС‚РѕРІС‹Р№
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(0, 0, 255)); // синий
+	sprLapa.setColor(Color(0, 0, 255)); // СЃРёРЅРёР№
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(255, 0, 0)); // красный
+	sprLapa.setColor(Color(255, 0, 0)); // РєСЂР°СЃРЅС‹Р№
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(0, 255, 0)); // зеленый
+	sprLapa.setColor(Color(0, 255, 0)); // Р·РµР»РµРЅС‹Р№
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(37, 244, 187)); // голубой
+	sprLapa.setColor(Color(37, 244, 187)); // РіРѕР»СѓР±РѕР№
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(239, 234, 22)); // желтый 
+	sprLapa.setColor(Color(239, 234, 22)); // Р¶РµР»С‚С‹Р№ 
 	colorLapa.push_back(sprLapa);
 	
 	completion();
 
-	int x0, y0, x, y; // столцеб и строка фишек, которые меняем местами
-	int click = 0; // состояние клика
-	Vector2i pos; // координаты, куда мы тыкнули. Начало отсчета от начала клеток
-	bool isSwap = false; // флаг, что мы что-то поменяли
-	bool isMoving = false;  // помеченные
-	int points = 0; // кол-во баллов
-	bool win = true; // флаг победы
-	int start_click = 0; // кол-во кликов в переходе между лвл
+	int x0, y0, x, y; // СЃС‚РѕР»С†РµР± Рё СЃС‚СЂРѕРєР° С„РёС€РµРє, РєРѕС‚РѕСЂС‹Рµ РјРµРЅСЏРµРј РјРµСЃС‚Р°РјРё
+	int click = 0; // СЃРѕСЃС‚РѕСЏРЅРёРµ РєР»РёРєР°
+	Vector2i pos; // РєРѕРѕСЂРґРёРЅР°С‚С‹, РєСѓРґР° РјС‹ С‚С‹РєРЅСѓР»Рё. РќР°С‡Р°Р»Рѕ РѕС‚СЃС‡РµС‚Р° РѕС‚ РЅР°С‡Р°Р»Р° РєР»РµС‚РѕРє
+	bool isSwap = false; // С„Р»Р°Рі, С‡С‚Рѕ РјС‹ С‡С‚Рѕ-С‚Рѕ РїРѕРјРµРЅСЏР»Рё
+	bool isMoving = false;  // РїРѕРјРµС‡РµРЅРЅС‹Рµ
+	int points = 0; // РєРѕР»-РІРѕ Р±Р°Р»Р»РѕРІ
+	bool win = true; // С„Р»Р°Рі РїРѕР±РµРґС‹
+	int start_click = 0; // РєРѕР»-РІРѕ РєР»РёРєРѕРІ РІ РїРµСЂРµС…РѕРґРµ РјРµР¶РґСѓ Р»РІР»
 	int level = 1; 
-	int goal = 1000; // сколько очков надо набрать
-	bool startGame = false; // флаг, что мы начали игру
+	int goal = 1000; // СЃРєРѕР»СЊРєРѕ РѕС‡РєРѕРІ РЅР°РґРѕ РЅР°Р±СЂР°С‚СЊ
+	bool startGame = false; // С„Р»Р°Рі, С‡С‚Рѕ РјС‹ РЅР°С‡Р°Р»Рё РёРіСЂСѓ
 
 
 	while (window.isOpen()) {
@@ -202,14 +202,14 @@ int main()
 						startGame = true;
 					}
 					pos = Mouse::getPosition(window) - offset;
-					if ((Mouse::getPosition(window).x >= 600) && // для кнопки mix
+					if ((Mouse::getPosition(window).x >= 600) && // РґР»СЏ РєРЅРѕРїРєРё mix
 						(Mouse::getPosition(window).x <= 850) &&
 						(Mouse::getPosition(window).y >= 455) &&
 						(Mouse::getPosition(window).y <= 540)) {
 							startGame = false;
 							completion();
 					}
-					if ((Mouse::getPosition(window).x >= 325) && // для кнопки next
+					if ((Mouse::getPosition(window).x >= 325) && // РґР»СЏ РєРЅРѕРїРєРё next
 						(Mouse::getPosition(window).x <= 575) &&
 						(Mouse::getPosition(window).y >= 420) &&
 						(Mouse::getPosition(window).y <= 520) && win) {
@@ -220,15 +220,15 @@ int main()
 			}
 		}
 		
-		// Кликанье - обмен
+		// РљР»РёРєР°РЅСЊРµ - РѕР±РјРµРЅ
 		if (click == 1) {
-			x0 = pos.x / cellSize + 1; // высчитываем, какая эта клетка
-			y0 = pos.y / cellSize + 1; // например, 1-1, 3-5 и тд
+			x0 = pos.x / cellSize + 1; // РІС‹СЃС‡РёС‚С‹РІР°РµРј, РєР°РєР°СЏ СЌС‚Р° РєР»РµС‚РєР°
+			y0 = pos.y / cellSize + 1; // РЅР°РїСЂРёРјРµСЂ, 1-1, 3-5 Рё С‚Рґ
 		}
 		if (click == 2) {
-			x = pos.x / cellSize + 1; // номер второй клетки
+			x = pos.x / cellSize + 1; // РЅРѕРјРµСЂ РІС‚РѕСЂРѕР№ РєР»РµС‚РєРё
 			y = pos.y / cellSize + 1;
-			if (abs(x - x0) + abs(y - y0) == 1) { // проверяем, что тыкнули на соседнюю
+			if (abs(x - x0) + abs(y - y0) == 1) { // РїСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ С‚С‹РєРЅСѓР»Рё РЅР° СЃРѕСЃРµРґРЅСЋСЋ
 				grid[y0][x0].swapPiece(grid[y][x]);
 				isSwap = 1;
 				click = 0;
@@ -261,13 +261,13 @@ int main()
 			}
 		}
 
-		// Повторая замена, если нет совпадений
+		// РџРѕРІС‚РѕСЂР°СЏ Р·Р°РјРµРЅР°, РµСЃР»Рё РЅРµС‚ СЃРѕРІРїР°РґРµРЅРёР№
 		if (isSwap && !isMoving) {
 				grid[y0][x0].swapPiece(grid[y][x]);
 				isSwap = 0;
 		}
 		
-		// Обновление 
+		// РћР±РЅРѕРІР»РµРЅРёРµ 
 		if (!isMoving) {
 			for (int i = sizeLevel; i > 0; i--) {
 				for (int j = 1; j <= sizeLevel; j++) {
@@ -296,7 +296,7 @@ int main()
 			} 
 		}
 
-		// переключение уровней
+		// РїРµСЂРµРєР»СЋС‡РµРЅРёРµ СѓСЂРѕРІРЅРµР№
 		if (points >= goal && level == 1) {
 			win = true;
 			cellSize = 89;
@@ -326,10 +326,10 @@ int main()
 			startGame = false;
 		}
 
-		// очищаем все
+		// РѕС‡РёС‰Р°РµРј РІСЃРµ
 		window.clear();
 
-		// Рисуем фон
+		// Р РёСЃСѓРµРј С„РѕРЅ
 		if (level == 1) {
 			window.draw(sprBackgroundLevel1);
 		}
@@ -353,7 +353,7 @@ int main()
 			window.draw(sprBackgroundLevel3);
 		}
 
-		// Первоначальное окно с инфой (вступление) 
+		// РџРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅРѕРµ РѕРєРЅРѕ СЃ РёРЅС„РѕР№ (РІСЃС‚СѓРїР»РµРЅРёРµ) 
 		if (start_click == 0 && level == 1) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
@@ -366,7 +366,7 @@ int main()
 			window.draw(textLevel);
 		}
 		
-		// кнопочка  дальше (первое переключение, победа + история)
+		// РєРЅРѕРїРѕС‡РєР°  РґР°Р»СЊС€Рµ (РїРµСЂРІРѕРµ РїРµСЂРµРєР»СЋС‡РµРЅРёРµ, РїРѕР±РµРґР° + РёСЃС‚РѕСЂРёСЏ)
 		if ((start_click == 0 && level == 1) ||
 			(start_click <= 2 && level > 1 && win)){
 			sprLabel.setScale(Vector2f(1, 1));
@@ -396,7 +396,7 @@ int main()
 									" ate together at lunch, and in the evening they\n"
 									" arranged dances. So every summer flew by.";
 
-		// вывод сюжетной истории в зависимости от уровня
+		// РІС‹РІРѕРґ СЃСЋР¶РµС‚РЅРѕР№ РёСЃС‚РѕСЂРёРё РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СѓСЂРѕРІРЅСЏ
 		if (start_click == 1 && win) {
 			sprLabel.setScale(Vector2f(3, 3));
 			sprLabel.setPosition(75, 100);
@@ -416,7 +416,7 @@ int main()
 			window.draw(textLabels);
 		}
 
-		// окно, которое даст нам знать, что мы выиграли
+		// РѕРєРЅРѕ, РєРѕС‚РѕСЂРѕРµ РґР°СЃС‚ РЅР°Рј Р·РЅР°С‚СЊ, С‡С‚Рѕ РјС‹ РІС‹РёРіСЂР°Р»Рё
 		if (win && level != 1 && start_click == 0) {
 			sprLabel.setScale(Vector2f(2, 3));
 			sprLabel.setPosition(200, 100);
@@ -428,14 +428,14 @@ int main()
 			window.draw(textLevel);
 		}
 
-		// переключение победы
+		// РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РїРѕР±РµРґС‹
 		if ((start_click == 1 && level == 1) || (start_click == 2)) {
 			win = false;
 		}
 
 
 		if ((level > 0) && (level < 4) && (!win)) {
-			// Рисуем сетку
+			// Р РёСЃСѓРµРј СЃРµС‚РєСѓ
 			for (int i = 0; i < sizeLevel; i++) {
 				for (int j = 0; j < sizeLevel; j++) {
 					sprSquareLevel1.setScale(Vector2f(float(cellSize - 5) / 100, float(cellSize - 5) / 100));
@@ -444,7 +444,7 @@ int main()
 				}
 			}
 
-			// Рисуем лапки
+			// Р РёСЃСѓРµРј Р»Р°РїРєРё
 			for (int i = 1; i <= sizeLevel; i++) {
 				for (int j = 1; j <= sizeLevel; j++) {
 					piece p = grid[i][j];
@@ -456,31 +456,31 @@ int main()
 				}
 			}
 
-			// Ячейки для инфы
+			// РЇС‡РµР№РєРё РґР»СЏ РёРЅС„С‹
 			sprLabel.setScale(Vector2f(1, 0.75));
 
-			// ячейка уровня
+			// СЏС‡РµР№РєР° СѓСЂРѕРІРЅСЏ
 			sprLabel.setPosition(600, 55); 
 			window.draw(sprLabel);
 			textLevel.setString("Level " + std::to_string(level));
 			textLevel.setPosition(645, 63);
 			window.draw(textLevel);
 
-			// ячейка цели уровня
+			// СЏС‡РµР№РєР° С†РµР»Рё СѓСЂРѕРІРЅСЏ
 			sprLabel.setPosition(600, 140);
 			window.draw(sprLabel);
 			textLabels.setString("Purpose: " + std::to_string(goal)); 
 			textLabels.setPosition(620, 160);
 			window.draw(textLabels);
 
-			// ячейка баллов
+			// СЏС‡РµР№РєР° Р±Р°Р»Р»РѕРІ
 			sprLabel.setPosition(600, 250);
 			window.draw(sprLabel);
 			textLabels.setString("Points Scored:");
 			textLabels.setPosition(622, 270);
 			window.draw(textLabels);
 
-			// Набранные баллы
+			// РќР°Р±СЂР°РЅРЅС‹Рµ Р±Р°Р»Р»С‹
 			sprLabel.setPosition(600, 335);
 			window.draw(sprLabel);
 			textLevel.setString(std::to_string(points));
@@ -500,7 +500,7 @@ int main()
 
 			sprLabel.setScale(Vector2f(1, 0.85));
 
-			// кнопочка микс
+			// РєРЅРѕРїРѕС‡РєР° РјРёРєСЃ
 			sprLabel.setPosition(600, 455);
 			window.draw(sprLabel);
 			textLevel.setString("MIX");
