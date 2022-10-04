@@ -1,2 +1,3 @@
 ﻿  main.cpp
+C:\Users\manan\source\repos\coursework\coursework\main.cpp(469,56): warning C4244: =: преобразование "float" в "int", возможна потеря данных
   coursework.vcxproj -> C:\Users\manan\source\repos\coursework\Debug\coursework.exe

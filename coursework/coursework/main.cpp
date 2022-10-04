@@ -1,4 +1,5 @@
 ﻿#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
 #include <iostream>
@@ -16,7 +17,7 @@ struct piece {
 	int col, row; // номер столбца и строки
 	int kind; // тип фишки
 	int match; // помечена ли фишка на удаление
-	int alpha;
+	int alpha;	
 
 	piece() {
 		alpha = 255;
@@ -153,22 +154,29 @@ int main()
 	textLevel.setStyle(sf::Text::Bold);
 
 
-	// Текст набранных баллов
+	// Основной текст
 	Text textLabels("", font, 30);
 	textLabels.setStyle(sf::Text::Bold);
 
+	// Песенка на фон
+	Music music;
+	music.openFromFile("music.ogg");
+	music.setVolume(25);
+	music.play();
+	music.setLoop(true);
+	
 
 	// Массив цветов лапок
 	std::vector<Sprite> colorLapa;
 	sprLapa.setColor(Color(208, 9, 199)); // фиолетовый
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(0, 0, 255)); // синий
+	sprLapa.setColor(Color(0, 120, 220)); // синий
 	colorLapa.push_back(sprLapa);
 	sprLapa.setColor(Color(255, 0, 0)); // красный
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(0, 255, 0)); // зеленый
+	sprLapa.setColor(Color(0, 220, 0)); // зеленый
 	colorLapa.push_back(sprLapa);
-	sprLapa.setColor(Color(37, 244, 187)); // голубой
+	sprLapa.setColor(Color(0, 250, 240)); // голубой
 	colorLapa.push_back(sprLapa);
 	sprLapa.setColor(Color(239, 234, 22)); // желтый 
 	colorLapa.push_back(sprLapa);
@@ -186,7 +194,10 @@ int main()
 	int level = 1;
 	int goal = 1000; // сколько очков надо набрать
 	bool startGame = false; // флаг, что мы начали игру
-
+	//Clock clock;
+	Clock gameTimeClock;
+	int gameTime = 0;
+	int gameTimeLimitation = 45;
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -203,17 +214,18 @@ int main()
 					pos = Mouse::getPosition(window) - offset;
 					if ((Mouse::getPosition(window).x >= 600) && // для кнопки mix
 						(Mouse::getPosition(window).x <= 850) &&
-						(Mouse::getPosition(window).y >= 455) &&
-						(Mouse::getPosition(window).y <= 540)) {
+						(Mouse::getPosition(window).y >= 460) &&
+						(Mouse::getPosition(window).y <= 535)) {
 						startGame = false;
 						completion();
 					}
 					if ((Mouse::getPosition(window).x >= 325) && // для кнопки next
 						(Mouse::getPosition(window).x <= 575) &&
 						(Mouse::getPosition(window).y >= 420) &&
-						(Mouse::getPosition(window).y <= 520) && win) {
-						start_click++;
-						//win = false;
+						(Mouse::getPosition(window).y <= 520) &&
+						(win || (gameTimeLimitation == gameTime))) {
+							start_click++;
+							gameTimeClock.restart();
 					}
 				}
 			}
@@ -280,18 +292,24 @@ int main()
 					}
 				}
 			}
-
+			int variance = points;
 			for (int j = 1; j <= sizeLevel; j++) {
 				for (int i = sizeLevel, n = 0; i > 0; i--) {
 					if (grid[i][j].match) {
 						if (startGame) {
 							points += 10;
 						}
-						grid[i][j].kind = rand() % 5;
+						grid[i][j].kind = rand() % (sizeLevel - 1);
 						grid[i][j].y = -cellSize * n++;
 						grid[i][j].match = 0;
 					}
 				}
+			}
+			if (points - variance == 40 && startGame) {
+				gameTimeLimitation += 10;
+			}
+			else if (points - variance == 50 && startGame) {
+				gameTimeLimitation += 15;
 			}
 		}
 
@@ -305,6 +323,9 @@ int main()
 			start_click = 0;
 			points = 0;
 			startGame = false;
+			gameTimeLimitation = 70;
+			gameTimeClock.restart();
+			gameTime = 0;
 		}
 
 		if (points >= goal && level == 2) {
@@ -316,6 +337,9 @@ int main()
 			start_click = 0;
 			points = 0;
 			startGame = false;
+			gameTimeLimitation = 95;
+			gameTimeClock.restart();
+			gameTime = 0;
 		}
 
 		if (points >= goal && level == 3) {
@@ -367,13 +391,20 @@ int main()
 
 		// кнопочка  дальше (первое переключение, победа + история)
 		if ((start_click == 0 && level == 1) ||
-			(start_click <= 2 && level > 1 && win)) {
-			sprLabel.setScale(Vector2f(1, 1));
-			sprLabel.setPosition(325, 420);
-			window.draw(sprLabel);
-			textLevel.setString("next");
-			textLevel.setPosition(390, 435);
-			window.draw(textLevel);
+			(start_click <= 2 && level > 1 && win) ||
+			(gameTimeLimitation == gameTime)) {
+				sprLabel.setScale(Vector2f(1, 1));
+				sprLabel.setPosition(325, 420);
+				window.draw(sprLabel);
+				if (gameTimeLimitation == gameTime) {
+					textLevel.setString("restart");
+					textLevel.setPosition(360, 435);
+				}
+				else {
+					textLevel.setString("next");
+					textLevel.setPosition(390, 435);
+				}
+				window.draw(textLevel);
 		}
 
 		std::string historyFirst = " When Martha was first brought to the country,\n"
@@ -432,8 +463,45 @@ int main()
 			win = false;
 		}
 
+		if ((start_click == 1 && level == 1) || 
+			(level > 1 &&  level < 4 && start_click >= 2)) {
+			if (gameTime != gameTimeLimitation) {
+				gameTime = gameTimeClock.getElapsedTime().asSeconds();
+			} 
+		}
 
-		if ((level > 0) && (level < 4) && (!win)) {
+		// закончилось время
+		if (gameTimeLimitation == gameTime) {
+			sprLabel.setScale(Vector2f(2, 3));
+			sprLabel.setPosition(200, 100);
+			window.draw(sprLabel);
+			textLevel.setString("  The time is over!\n"
+								"    Your cats have\n" 
+								"   gone to another");
+			textLevel.setPosition(215, 140);
+			window.draw(textLevel);
+			if (start_click == 2 && level == 1) {
+				gameTime = 0;
+				points = 0;
+				gameTimeClock.restart();
+				start_click = 1;
+				gameTimeLimitation = 45;
+			}
+			if (start_click == 3 && level != 1) {
+				gameTime = 0;
+				points = 0;
+				gameTimeClock.restart();
+				start_click = 2;
+				if (level == 2) {
+					gameTimeLimitation = 70;
+				}
+				else {
+					gameTimeLimitation = 95;
+				}
+			}
+		}
+
+		if ((level > 0) && (level < 4) && (!win) && (gameTimeLimitation != gameTime)) {
 			// Рисуем сетку
 			for (int i = 0; i < sizeLevel; i++) {
 				for (int j = 0; j < sizeLevel; j++) {
@@ -459,51 +527,60 @@ int main()
 			sprLabel.setScale(Vector2f(1, 0.75));
 
 			// ячейка уровня
-			sprLabel.setPosition(600, 55);
+			sprLabel.setPosition(600, 35);
 			window.draw(sprLabel);
 			textLevel.setString("Level " + std::to_string(level));
-			textLevel.setPosition(645, 63);
+			textLevel.setPosition(645, 43);
 			window.draw(textLevel);
 
 			// ячейка цели уровня
-			sprLabel.setPosition(600, 140);
+			sprLabel.setPosition(600, 125);
 			window.draw(sprLabel);
-			textLabels.setString("Purpose: " + std::to_string(goal));
-			textLabels.setPosition(620, 160);
+			textLabels.setString("Purrpose: " + std::to_string(goal));
+			textLabels.setPosition(615, 145);
 			window.draw(textLabels);
 
 			// ячейка баллов
-			sprLabel.setPosition(600, 250);
+			sprLabel.setPosition(600, 215);
 			window.draw(sprLabel);
 			textLabels.setString("Points Scored:");
-			textLabels.setPosition(622, 270);
+			textLabels.setPosition(622, 235);
 			window.draw(textLabels);
 
 			// Набранные баллы
-			sprLabel.setPosition(600, 335);
+			sprLabel.setPosition(600, 305);
 			window.draw(sprLabel);
 			textLevel.setString(std::to_string(points));
 			if (points == 0) {
-				textLevel.setPosition(710, 345);
+				textLevel.setPosition(710, 315);
 			}
 			else if (points < 100) {
-				textLevel.setPosition(700, 345);
+				textLevel.setPosition(700, 315);
 			}
 			else if (points < 1000) {
-				textLevel.setPosition(685, 345);
+				textLevel.setPosition(685, 315);
 			}
 			else {
-				textLevel.setPosition(680, 345);
+				textLevel.setPosition(680, 315);
 			}
 			window.draw(textLevel);
-
-			sprLabel.setScale(Vector2f(1, float(0.85)));
+			
+			sprLabel.setPosition(600, 390);
+			window.draw(sprLabel);
+			std::string withZeros = std::to_string((gameTimeLimitation - gameTime) % 60);
+			if ((gameTimeLimitation - gameTime) % 60 < 10) {
+				withZeros = "0" + withZeros;
+			}
+			textLabels.setString("Time: 0" + std::to_string((gameTimeLimitation - gameTime) / 60) + 
+				":" + withZeros);
+			textLabels.setPosition(635, 410);
+			window.draw(textLabels);
 
 			// кнопочка микс
-			sprLabel.setPosition(600, 455);
+			sprLabel.setPosition(600, 480);
 			window.draw(sprLabel);
 			textLevel.setString("MIX");
-			textLevel.setPosition(670, 465);
+			textLevel.setPosition(670, 485);
 			window.draw(textLevel);
 		}
 		window.display();
