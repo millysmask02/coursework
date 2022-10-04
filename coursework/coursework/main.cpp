@@ -17,7 +17,7 @@ struct piece {
 	int col, row; // номер столбца и строки
 	int kind; // тип фишки
 	int match; // помечена ли фишка на удаление
-	int alpha;	
+	int alpha;
 
 	piece() {
 		alpha = 255;
@@ -161,10 +161,16 @@ int main()
 	// Песенка на фон
 	Music music;
 	music.openFromFile("music.ogg");
-	music.setVolume(25);
+	music.setVolume(10);
 	music.play();
 	music.setLoop(true);
-	
+
+	// звук на обмен фишек
+	SoundBuffer buffer;
+	buffer.loadFromFile("meow.ogg");
+	Sound sound;
+	sound.setBuffer(buffer);
+
 
 	// Массив цветов лапок
 	std::vector<Sprite> colorLapa;
@@ -224,8 +230,8 @@ int main()
 						(Mouse::getPosition(window).y >= 420) &&
 						(Mouse::getPosition(window).y <= 520) &&
 						(win || (gameTimeLimitation == gameTime))) {
-							start_click++;
-							gameTimeClock.restart();
+						start_click++;
+						gameTimeClock.restart();
 					}
 				}
 			}
@@ -243,6 +249,7 @@ int main()
 				grid[y0][x0].swapPiece(grid[y][x]);
 				isSwap = 1;
 				click = 0;
+				sound.play();
 			}
 			else {
 				click = 1;
@@ -393,18 +400,18 @@ int main()
 		if ((start_click == 0 && level == 1) ||
 			(start_click <= 2 && level > 1 && win) ||
 			(gameTimeLimitation == gameTime)) {
-				sprLabel.setScale(Vector2f(1, 1));
-				sprLabel.setPosition(325, 420);
-				window.draw(sprLabel);
-				if (gameTimeLimitation == gameTime) {
-					textLevel.setString("restart");
-					textLevel.setPosition(360, 435);
-				}
-				else {
-					textLevel.setString("next");
-					textLevel.setPosition(390, 435);
-				}
-				window.draw(textLevel);
+			sprLabel.setScale(Vector2f(1, 1));
+			sprLabel.setPosition(325, 420);
+			window.draw(sprLabel);
+			if (gameTimeLimitation == gameTime) {
+				textLevel.setString("restart");
+				textLevel.setPosition(360, 435);
+			}
+			else {
+				textLevel.setString("next");
+				textLevel.setPosition(390, 435);
+			}
+			window.draw(textLevel);
 		}
 
 		std::string historyFirst = " When Martha was first brought to the country,\n"
@@ -463,11 +470,11 @@ int main()
 			win = false;
 		}
 
-		if ((start_click == 1 && level == 1) || 
-			(level > 1 &&  level < 4 && start_click >= 2)) {
+		if ((start_click == 1 && level == 1) ||
+			(level > 1 && level < 4 && start_click >= 2)) {
 			if (gameTime != gameTimeLimitation) {
 				gameTime = gameTimeClock.getElapsedTime().asSeconds();
-			} 
+			}
 		}
 
 		// закончилось время
@@ -476,8 +483,8 @@ int main()
 			sprLabel.setPosition(200, 100);
 			window.draw(sprLabel);
 			textLevel.setString("  The time is over!\n"
-								"    Your cats have\n" 
-								"   gone to another");
+				"    Your cats have\n"
+				"   gone to another");
 			textLevel.setPosition(215, 140);
 			window.draw(textLevel);
 			if (start_click == 2 && level == 1) {
@@ -564,14 +571,14 @@ int main()
 				textLevel.setPosition(680, 315);
 			}
 			window.draw(textLevel);
-			
+
 			sprLabel.setPosition(600, 390);
 			window.draw(sprLabel);
 			std::string withZeros = std::to_string((gameTimeLimitation - gameTime) % 60);
 			if ((gameTimeLimitation - gameTime) % 60 < 10) {
 				withZeros = "0" + withZeros;
 			}
-			textLabels.setString("Time: 0" + std::to_string((gameTimeLimitation - gameTime) / 60) + 
+			textLabels.setString("Time: 0" + std::to_string((gameTimeLimitation - gameTime) / 60) +
 				":" + withZeros);
 			textLabels.setPosition(635, 410);
 			window.draw(textLabels);
